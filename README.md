@@ -171,8 +171,36 @@ All motion lives in `src/index.css` and `src/components/Motion.jsx`.
 - `.spin-slow` — slow rotation for decorative marks
 - `.grain` — SVG noise overlay on dark sections
 
+**What animates, and when**
+
+| Element | Trigger | Effect | Duration |
+| --- | --- | --- | --- |
+| Section eyebrows | Enters viewport | Fade + 24px lift | 0.8s |
+| Headings | Enters viewport | Word-by-word rise from a mask, 55ms stagger | 0.9s |
+| Images | Enters viewport | Top-to-bottom clip wipe + 1.06 → 1 scale | 1.1s |
+| Product cards | Hover | Lift 6px, shadow deepen, image zoom | 0.5s |
+| Stat counters | Enters viewport | Ease-out count from 0 to target | 1.5s |
+| Primary buttons | Hover | Shine sweep across the surface | 3.4s loop |
+| Ticker strip | Always | Linear left scroll, seamless loop | 40s loop |
+| Hero steam mark | Always | Rise, fade, widen — three staggered wisps | 3.4s, 0.8s offset |
+| Nav links | Hover | Underline grows from left | 0.3s |
+| Mobile drawer | Open / close | Slide from right, backdrop blur in | 0.5s |
+| Testimonial dots | Click | Width grows from 16px to 36px | 0.5s |
+
+Everything above uses `transform`, `opacity` or `clip-path` only, so animation stays
+on the compositor and never triggers layout.
+
+**Easing and stagger** — reveals share one curve, `cubic-bezier(0.16, 1, 0.3, 1)`
+(expo out). Stagger is passed per component through a `--d` custom property on the
+inline style, so delays compose without extra CSS classes.
+
+**Observer thresholds** — tuned per primitive so elements trigger as they genuinely
+enter view rather than at the screen edge: `0.14` with a negative bottom `rootMargin`
+for reveals, `0.3` for headings, `0.5` for counters.
+
 **Reduced motion** — every animation and transition is disabled under
-`prefers-reduced-motion: reduce`, and observers are not attached at all.
+`prefers-reduced-motion: reduce`, reveal components resolve straight to their final
+state, and observers are not attached at all.
 
 **Known pitfall** — `MaskImage` must observe its unclipped wrapper, not the element
 carrying `clip-path: inset(0 0 100% 0)`. Chrome reports `intersectionRatio: 0` for a
